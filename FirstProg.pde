@@ -17,8 +17,8 @@ final static float HEIGHT = SPRITE_SIZE * 12;
 final static float GROUND_LEVEL = HEIGHT - SPRITE_SIZE; 
 
 //declare global variables
-Sprite p;
-PImage snow, red_brick, crate, brown_brick, gold, spider;
+Player player;
+PImage snow, red_brick, crate, brown_brick, gold, spider, p;
 ArrayList<Sprite> platforms;
 ArrayList<Sprite> coins;
 Enemy enemy;
@@ -32,11 +32,17 @@ float view_y = 0;
 void setup(){
   size(800,600);
   imageMode(CENTER);
-  p = new Sprite("data/player.png", 1.0, 400, 100);
+  
+  // create Player object 
+  p = loadImage("player.png"); 
+  player = new Player(p, 0.8); 
+  player.setBottom(GROUND_LEVEL); 
+  player.center_x = 100;  
+  
   platforms = new ArrayList<Sprite>();
   coins = new ArrayList<Sprite>();
-  p.change_x = 0;
-  p.change_y = 0;
+  player.change_x = 0;
+  player.change_y = 0;
   
   //load images
   gold = loadImage("gold1.png");
@@ -48,14 +54,20 @@ void setup(){
   
   createPlatforms("map.csv");
 }
+
+
 //modify and update them in draw().
 void draw(){
-  background(0,255,0);
+  background(255);
   
   //scroll needs to be the first method called
   scroll();
-  p.display();
-  resolvePlatformCollision(p, platforms);
+  
+  
+  player.display();
+  player.updateAnimation(); 
+  
+  resolvePlatformCollision(player, platforms);
   
   for(Sprite s: platforms)
     s.display();
@@ -75,20 +87,20 @@ void draw(){
 //scroll
 void scroll(){
   float right_boundary = view_x + width - RIGHT_MARGIN;
-  if(p.getRight() > right_boundary){
-    view_x+= p.getRight() - right_boundary;
+  if(player.getRight() > right_boundary){
+    view_x+= player.getRight() - right_boundary;
   }
   float left_boundary = view_x + LEFT_MARGIN;
-  if(p.getLeft() < left_boundary){
-    view_y-= p.getLeft() - left_boundary;
+  if(player.getLeft() < left_boundary){
+    view_y-= player.getLeft() - left_boundary;
   }
   float top_boundary = view_y + VERTICAL_MARGIN;
-  if(p.getTop() < top_boundary){
-    view_y-= top_boundary - p.getTop();
+  if(player.getTop() < top_boundary){
+    view_y-= top_boundary - player.getTop();
   }
   float bottom_boundary = view_y + height - VERTICAL_MARGIN;
-  if(p.getBottom() > bottom_boundary){
-    view_y+= p.getBottom() - bottom_boundary;
+  if(player.getBottom() > bottom_boundary){
+    view_y+= player.getBottom() - bottom_boundary;
   }
   translate(-view_x,-view_y);
 }
@@ -215,30 +227,30 @@ void createPlatforms(String fileName){
 //called whenever a key is pressed
 void keyPressed(){
   if(keyCode == RIGHT){
-    p.change_x= MOVE_SPEED;
+    player.change_x= MOVE_SPEED;
   }
   else if(keyCode == LEFT){
-    p.change_x=-MOVE_SPEED;
+    player.change_x=-MOVE_SPEED;
   }
   else if(keyCode == UP){
-    p.change_y=-JUMP_SPEED;
+    player.change_y=-JUMP_SPEED;
   }
   else if(keyCode == DOWN){
-    p.change_y=MOVE_SPEED;
+    player.change_y=MOVE_SPEED;
   }
 }
 //called whenever a key is released
 void keyReleased(){
   if(keyCode == RIGHT){
-    p.change_x=0;
+    player.change_x=0;
   }
   else if(keyCode == LEFT){
-    p.change_x=0;
+    player.change_x=0;
   }
   else if(keyCode == UP){
-    p.change_y=0;
+    player.change_y=0;
   }
   else if(keyCode == DOWN){
-    p.change_y=0;
+    player.change_y=0;
   }
 }
