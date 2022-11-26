@@ -17,30 +17,38 @@ final static float HEIGHT = SPRITE_SIZE * 12;
 final static float GROUND_LEVEL = HEIGHT - SPRITE_SIZE; 
 
 //declare global variables
-Player p;
-PImage snow, red_brick, crate, brown_brick, gold, spider, player;
+Player player;
+PImage snow, red_brick, crate, brown_brick, gold, spider, p;
 ArrayList<Sprite> platforms;
 ArrayList<Sprite> coins;
 Enemy enemy;
 
 //int numCoins;
-
 float view_x = 0;
 float view_y = 0;
+
+boolean isGameOver; 
+int numCoins;
 
 //initialize them in setup().
 void setup(){
   size(800,600);
   imageMode(CENTER);
-  //create player
-  player = loadImage("player.png");
-  p = new Player(player, 0.8);
-  p.setBottom(GROUND_LEVEL);
+  
+  // create Player object 
+  p = loadImage("player.png"); 
+  player = new Player(p, 0.8); 
+  player.setBottom(GROUND_LEVEL); 
+  player.center_x = 100;  
   
   platforms = new ArrayList<Sprite>();
   coins = new ArrayList<Sprite>();
-  p.change_x = 0;
-  p.change_y = 0;
+  player.change_x = 0;
+  player.change_y = 0;
+  
+  numCoins = 0; 
+  isGameOver = false; 
+  
   
   //load images
   gold = loadImage("gold1.png");
@@ -49,50 +57,118 @@ void setup(){
   crate = loadImage("crate.png");
   brown_brick = loadImage("brown_brick.png");
   spider = loadImage("spider_walk_right1.png");
-  
   createPlatforms("map.csv");
+  
+  view_x = 0; 
+  view_y = 0; 
 }
-//modify and update them in draw().
+
+
+// modify and update them in draw().
 void draw(){
-  background(0,255,0);
+  background(255);
   
-  //scroll needs to be the first method called
+  // scroll needs to be the first method called
   scroll();
-  p.display();
-  resolvePlatformCollision(p, platforms);
   
-  for(Sprite s: platforms)
-    s.display();
-  for(Sprite c: coins){
-    c.display();
-    ((AnimatedSprite)c).updateAnimation();
+  // display objects
+  displayAll(); 
+  
+  // update objects 
+  if(!isGameOver) {
+    updateAll(); 
+    collectCoins(); 
+    checkDeath(); 
   }
-  //collectCoins();
-  //fill(255,0,0);
-  //textSize(32);
-  //text("Coins: " + numCoins, 50, 50);
-  
+}
+
+void displayAll() {
+  for(Sprite platform: platforms)
+    platform.display();
+    
+  for(Sprite coin: coins){
+    coin.display();
+  }
+    
+  player.display();
   enemy.display();
+  
+  fill(255, 0, 0); 
+  textSize(32); 
+  text("Coin:" + numCoins, view_x + 50, view_y + 50); 
+  text("Lives:" + player.lives, view_x + 50, view_y + 100); 
+  
+  if(isGameOver) { 
+    fill(0, 0, 255); 
+    text("GAME OVER", view_x + width/2 - 100, view_y + height/2); 
+    if(player.lives == 0) 
+      text("You lose!", view_x + width/2 - 100, view_y + height/2 + 50); 
+    else
+      text("You win!", view_x + width/2 - 100, view_y + height/2 + 50); 
+    text("Press SPACE to restart!", view_x + width/2 - 100, view_y + height/2 + 100); 
+  }
+}
+
+void updateAll() {
+  resolvePlatformCollision(player, platforms);
   enemy.update();
   enemy.updateAnimation();
+  player.updateAnimation(); 
+  
+  for (Sprite coin: coins) {
+    ((AnimatedSprite)coin).updateAnimation();
+  }
+  
+  collectCoins(); 
+  checkDeath(); 
 }
-//scroll
+
+void checkDeath() {
+  boolean collideEnemy = checkCollision(player, enemy); 
+  boolean fallOffCliff = player.getBottom() > GROUND_LEVEL; 
+  if (collideEnemy || fallOffCliff) {
+    player.lives--; 
+    if (player.lives == 0) {
+      isGameOver = true; 
+    }
+    else {
+      player.center_x = 100; 
+      player.setBottom(GROUND_LEVEL); 
+    }
+  }
+}
+
+void collectCoins() {
+  ArrayList<Sprite> coin_list = checkCollisionList(player, coins); 
+  if(coin_list.size() > 0) {
+    for(Sprite coin: coin_list) {
+      numCoins++; 
+      coins.remove(coin); 
+    }
+  }
+  // collect all coins to win! 
+  if(coins.size() == 0) {
+    isGameOver = true; 
+  }
+}
+
+// scroll
 void scroll(){
   float right_boundary = view_x + width - RIGHT_MARGIN;
-  if(p.getRight() > right_boundary){
-    view_x+= p.getRight() - right_boundary;
+  if(player.getRight() > right_boundary){
+    view_x+= player.getRight() - right_boundary;
   }
   float left_boundary = view_x + LEFT_MARGIN;
-  if(p.getLeft() < left_boundary){
-    view_y-= p.getLeft() - left_boundary;
+  if(player.getLeft() < left_boundary){
+    view_y-= player.getLeft() - left_boundary;
   }
   float top_boundary = view_y + VERTICAL_MARGIN;
-  if(p.getTop() < top_boundary){
-    view_y-= top_boundary - p.getTop();
+  if(player.getTop() < top_boundary){
+    view_y-= top_boundary - player.getTop();
   }
   float bottom_boundary = view_y + height - VERTICAL_MARGIN;
-  if(p.getBottom() > bottom_boundary){
-    view_y+= p.getBottom() - bottom_boundary;
+  if(player.getBottom() > bottom_boundary){
+    view_y+= player.getBottom() - bottom_boundary;
   }
   translate(-view_x,-view_y);
 }
@@ -219,30 +295,30 @@ void createPlatforms(String fileName){
 //called whenever a key is pressed
 void keyPressed(){
   if(keyCode == RIGHT){
-    p.change_x= MOVE_SPEED;
+    player.change_x = MOVE_SPEED;
   }
   else if(keyCode == LEFT){
-    p.change_x=-MOVE_SPEED;
+    player.change_x = -MOVE_SPEED;
   }
-  else if(keyCode == UP){
-    p.change_y=-JUMP_SPEED;
+  else if(keyCode == UP && isOnPlatforms(player, platforms)){
+    player.change_y = -JUMP_SPEED;
   }
-  else if(keyCode == DOWN){
-    p.change_y=MOVE_SPEED;
-  }
+  else if(isGameOver && key == ' ') 
+    setup();  
 }
+
 //called whenever a key is released
 void keyReleased(){
   if(keyCode == RIGHT){
-    p.change_x=0;
+    player.change_x=0;
   }
   else if(keyCode == LEFT){
-    p.change_x=0;
+    player.change_x=0;
   }
   else if(keyCode == UP){
-    p.change_y=0;
+    player.change_y=0;
   }
   else if(keyCode == DOWN){
-    p.change_y=0;
+    player.change_y=0;
   }
 }

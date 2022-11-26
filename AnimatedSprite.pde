@@ -21,10 +21,10 @@ public class AnimatedSprite extends Sprite {
     }
   }
   public void selectDirection(){
-    if(change_x>0){
+    if(change_x > 0){
       direction = RIGHT_FACING;
     }
-    else if(change_x<0){
+    else if(change_x < 0){
       direction = LEFT_FACING;
     }
     else{
