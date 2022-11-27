@@ -27,8 +27,15 @@ Enemy enemy;
 float view_x = 0;
 float view_y = 0;
 
-boolean isGameOver; 
+boolean isGameOver;
+boolean finishedAllLevel;
 int numCoins;
+
+//temporary storage of player lives
+int temp = 0;
+
+//level
+int level = 1;
 
 //initialize them in setup().
 void setup(){
@@ -61,6 +68,44 @@ void setup(){
   
   view_x = 0; 
   view_y = 0; 
+  
+  //update player lives
+  player.lives = player.lives-temp;
+}
+
+void setup2(){
+  size(800,600);
+  imageMode(CENTER);
+  
+  // create Player object 
+  p = loadImage("player.png"); 
+  player = new Player(p, 0.8); 
+  player.setBottom(GROUND_LEVEL); 
+  player.center_x = 100;  
+  
+  platforms = new ArrayList<Sprite>();
+  coins = new ArrayList<Sprite>();
+  player.change_x = 0;
+  player.change_y = 0;
+  
+  numCoins = 0; 
+  isGameOver = false; 
+  
+  
+  //load images
+  gold = loadImage("gold1.png");
+  red_brick = loadImage("red_brick.png");
+  snow = loadImage("snow.png");
+  crate = loadImage("crate.png");
+  brown_brick = loadImage("brown_brick.png");
+  spider = loadImage("spider_walk_right1.png");
+  createPlatforms("map2.csv");
+  
+  view_x = 0; 
+  view_y = 0; 
+  
+  //update player lives
+  player.lives = player.lives-temp;
 }
 
 
@@ -79,6 +124,7 @@ void draw(){
     updateAll(); 
     collectCoins(); 
     checkDeath(); 
+    checkEndGame();
   }
 }
 
@@ -96,13 +142,16 @@ void displayAll() {
   fill(255, 0, 0); 
   textSize(32); 
   text("Coin:" + numCoins, view_x + 50, view_y + 50); 
-  text("Lives:" + player.lives, view_x + 50, view_y + 100); 
+  text("Lives:" + player.lives, view_x + 50, view_y + 100);
+  text("Level: " + level, view_x + 50, view_y + 150);
   
   if(isGameOver) { 
     fill(0, 0, 255); 
     text("GAME OVER", view_x + width/2 - 100, view_y + height/2); 
     if(player.lives == 0) 
       text("You lose!", view_x + width/2 - 100, view_y + height/2 + 50); 
+    else if(finishedAllLevel)
+      text("You win!", view_x + width/2 - 100, view_y + height/2 + 50); 
     else
       text("You win!", view_x + width/2 - 100, view_y + height/2 + 50); 
     text("Press SPACE to restart!", view_x + width/2 - 100, view_y + height/2 + 100); 
@@ -121,13 +170,18 @@ void updateAll() {
   
   collectCoins(); 
   checkDeath(); 
+  checkEndGame();
 }
 
 void checkDeath() {
   boolean collideEnemy = checkCollision(player, enemy); 
   boolean fallOffCliff = player.getBottom() > GROUND_LEVEL; 
   if (collideEnemy || fallOffCliff) {
-    player.lives--; 
+    temp++;
+    if(level==1)
+      setup();
+     else
+       setup2();
     if (player.lives == 0) {
       isGameOver = true; 
     }
@@ -137,6 +191,13 @@ void checkDeath() {
     }
   }
 }
+
+void checkEndGame(){
+  finishedAllLevel = level>2;
+  if(finishedAllLevel)
+    isGameOver = true;
+}
+  
 
 void collectCoins() {
   ArrayList<Sprite> coin_list = checkCollisionList(player, coins); 
@@ -148,7 +209,9 @@ void collectCoins() {
   }
   // collect all coins to win! 
   if(coins.size() == 0) {
-    isGameOver = true; 
+    //isGameOver = true; 
+    level++;
+    setup2();
   }
 }
 
