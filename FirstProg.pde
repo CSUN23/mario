@@ -88,7 +88,7 @@ void setup2(){
   player.change_x = 0;
   player.change_y = 0;
   
-  //numCoins = 0; 
+  numCoins = 7; 
   isGameOver = false; 
   
   
