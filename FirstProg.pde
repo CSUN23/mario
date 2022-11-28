@@ -181,7 +181,7 @@ void checkDeath() {
     if(level==1)
       setup();
      else
-       setup2();
+      setup2();
     if (player.lives == 0) {
       isGameOver = true; 
     }
@@ -219,29 +219,29 @@ void collectCoins() {
 void scroll(){
   float right_boundary = view_x + width - RIGHT_MARGIN;
   if(player.getRight() > right_boundary){
-    view_x+= player.getRight() - right_boundary;
+    view_x += player.getRight() - right_boundary;
   }
   float left_boundary = view_x + LEFT_MARGIN;
   if(player.getLeft() < left_boundary){
-    view_y-= player.getLeft() - left_boundary;
+    view_y -= player.getLeft() - left_boundary;
   }
   float top_boundary = view_y + VERTICAL_MARGIN;
   if(player.getTop() < top_boundary){
-    view_y-= top_boundary - player.getTop();
+    view_y -= top_boundary - player.getTop();
   }
   float bottom_boundary = view_y + height - VERTICAL_MARGIN;
   if(player.getBottom() > bottom_boundary){
-    view_y+= player.getBottom() - bottom_boundary;
+    view_y += player.getBottom() - bottom_boundary;
   }
   translate(-view_x,-view_y);
 }
 
 //jump
 public boolean isOnPlatforms(Sprite s, ArrayList<Sprite> walls){
-  s.center_y+=5;
+  s.center_y += 5;
   ArrayList<Sprite> col_list = checkCollisionList(s, walls); 
-  s.center_y-=5;
-  if(col_list.size()>0){
+  s.center_y -= 5;
+  if(col_list.size() > 0){
     return true;
   }
   else{
@@ -366,8 +366,10 @@ void keyPressed(){
   else if(keyCode == UP && isOnPlatforms(player, platforms)){
     player.change_y = -JUMP_SPEED;
   }
-  else if(isGameOver && key == ' ') 
+  else if(isGameOver && key == ' ') {
+    temp = 0; 
     setup();  
+  }
 }
 
 //called whenever a key is released
@@ -381,7 +383,7 @@ void keyReleased(){
   else if(keyCode == UP){
     player.change_y=0;
   }
-  else if(keyCode == DOWN){
-    player.change_y=0;
-  }
+  //else if(keyCode == DOWN){
+  //  player.change_y=0;
+  //}
 }
