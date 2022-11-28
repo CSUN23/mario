@@ -367,6 +367,7 @@ void keyPressed(){
     player.change_y = -JUMP_SPEED;
   }
   else if(isGameOver && key == ' ') {
+    level = 1; 
     temp = 0; 
     setup();  
   }
