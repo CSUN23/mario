@@ -88,7 +88,7 @@ void setup2(){
   player.change_x = 0;
   player.change_y = 0;
   
-  numCoins = 0; 
+  //numCoins = 0; 
   isGameOver = false; 
   
   
@@ -217,13 +217,14 @@ void collectCoins() {
 
 // scroll
 void scroll(){
+
   float right_boundary = view_x + width - RIGHT_MARGIN;
   if(player.getRight() > right_boundary){
     view_x += player.getRight() - right_boundary;
   }
   float left_boundary = view_x + LEFT_MARGIN;
   if(player.getLeft() < left_boundary){
-    view_y -= player.getLeft() - left_boundary;
+    view_y -= left_boundary - player.getLeft();
   }
   float top_boundary = view_y + VERTICAL_MARGIN;
   if(player.getTop() < top_boundary){
